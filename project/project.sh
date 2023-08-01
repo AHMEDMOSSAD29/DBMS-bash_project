@@ -7,127 +7,206 @@ Enter your option >>> "
 
 # Function to create a new database
 create_database() {
-    read -p "Enter the name of the new database: " database_name
+    read -p "
+              Enter the name of the new database: " database_name
     
     regex="^[a-zA-Z][a-zA-Z0-9_]*$"
     
     if ! [[ $database_name =~ $regex ]]; then
-	echo "                                                                             "
-        echo "Invalid,The name should only contain alphanumeric characters and underscores."
-	echo "                                                                             "
+	
+        echo "
+	       Invalid,The name should only contain alphanumeric characters and underscores.
+	     "
+	
         return
     elif [[ -d $database_name ]]; then
-	echo "                                                                       "
-        echo "Database[ $database_name ]already exists. Please choose a different name."
-	echo "                                                                       "
+
+        echo "
+	       Database[ $database_name ]already exists. Please choose a different name.
+	     "
+	
         return
     else
     
     mkdir $database_name
-    echo "                                             "
-    echo "Database[ $database_name ]created successfully!"
-    echo "                                             "
+   
+    echo "
+            Database[ $database_name ]created successfully!
+	 "
+    
     fi
 }
 
 # Function to list all existing databases
 list_databases() {
 
-	echo "========================================================================="
-        echo "                             List of Databases                           "
-        echo "========================================================================="
+	
+        echo " 
+	---------------------List of Databases----------------------
+	     "
      for db in */
     do
         if [[ -d $db ]]
 
         then
-                echo "                           "
-                echo    "Database Name=[ ${db%/} ]"
-	        echo "                           "
+                
+                echo "
+		        Database Name=[ ${db%/} ]
+		     "
+	      
 	else
-         	echo "                               "
-                echo "     No Databases avilable     "
-                echo "                               "
+         	
+                echo "
+	         	No Databases avilable    
+	             "
+               
         fi
     done
 }
 
 # Function to drop a database
 drop_database() {
-    read -p "Enter the name of the database to drop (separated by spaces if more than one): " db_names
+    read -p "
+    Enter the name of the database to drop (separated by spaces if more than one): " db_names
     for db_name in $db_names
     do
         if [[ ! -d $db_name ]]
         then
-		echo "                                 "
-                echo "Database[ $db_name ]does not exist."
-	        echo "                                 "
+		
+                echo "
+	        	Database[ $db_name ]does not exist.
+		     "
+	        
         else
             rm -rf $db_name
-	    echo "                                       "
-            echo "Database[ $db_name ]dropped successfully!"
-	    echo "                                       "
+	    
+            echo "
+	              Database[ $db_name ]dropped successfully!
+	         "
+	   
 
         fi
     done
 }
  
- create_table() {
+create_table() {
     # Prompt user for table name
     while true; do 
-        read -p "Enter the table name: " table_name
+        read -p "
+	          Enter the table name: " table_name
         if ! [[ "$table_name" =~ ^[a-zA-Z]+$ ]]; then
-            echo "Invalid table name. Please choose another one."
+            echo "
+	           Invalid table name. Please choose another one.
+	         "
         elif [ -f "$table_name" ]; then
-            echo "Table already exists."
+            echo "
+	           Table already exist
+		 "
+	    return 1
         else
-            touch "$table_name.csv"
-            echo "Table [$table_name] created successfully."
+            touch "$table_name"
+            echo "
+	           Table [$table_name] created successfully.
+		 "
             break
         fi
     done
 
     # Prompt user for column details
     while true; do 
-        read -p "Enter column name (leave empty to finish): " column_name
+        read -p "
+	           Enter column name (leave empty to finish): " column_name
         if [ -z "$column_name" ]; then
             break
         elif ! [[ "$column_name" =~ ^[a-zA-Z0-9]+$ ]]; then
-            echo "Invalid column name. Please choose another one."
+            echo "
+	           Invalid column name. Please choose another one.
+		 "
         else
             # Prompt user for column data type
-            read -p "Enter column data type: " column_type
+            read -p " 
+	             Enter column data type: " column_type
 
             # Prompt user for primary key status
-            read -p "Is this column a primary key? (y/n): " is_primary_key
+            read -p "
+	             Is this column a primary key? (y/n): " is_primary_key
             if [[ "$is_primary_key" =~ ^y$|^Y$ ]]; then
                 column_type="$column_type:PRIMARY KEY"
             fi
 
             # Add column to table
-            echo "Adding column [$column_name] with type [$column_type]."
-            echo "$column_name:$column_type" >> "$table_name.csv"
+            echo "
+	           Adding column [$column_name] with type [$column_type].
+		 "
+            echo "$column_name:$column_type" >> "$table_name"
         fi
     done
 }
 
+#function to list tables
+list_table() {
+ echo "
+        -----------------list of tables----------------
+        "
+	dir=$(pwd)
 
+    if [ "$(ls -A $dir)" ]
+    then
+	    echo "`ls $dir`"
+    else
+        echo "
+	        No tables exist 
+	     "
+        read -p "Would you like to create new table? (y/n) " ans
+        if [[ "$ans" =~ ^Y$|^y$ ]]
+        then
+            create_table
+        else
+            echo "
+	          No table created
+	    "
+        fi
+    fi
+}
 
+drop_table() {
+    read -p "
+               Enter the name(s) of the table(s) to drop: " -a table_names
+    for table_name in "${table_names[@]}"
+    do
+        if [ -f "$table_name" ]
+        then
+            rm -r "$table_name"
+            echo "
+	               $table_name dropped.
+	               "
+        else
+            echo "
+	               $table_name does not exist, cannot be dropped.
+	               "
+        fi
+    done
+}
 
 # Function to connect to a database
 connect_to_database() {
-    read -p "Enter the name of the database to connect to: " database_name
+    read -p "
+                 Enter the name of the database to connect : " database_name
     if [[ ! -d $database_name ]]
     then
-        echo "                                                                       "
-        echo "Database[ $database_name ]does not exist. Please choose a different name."
-        echo "                                                                       "
+       
+        echo "
+	       Database[ $database_name ]does not exist. Please choose a different name.
+	     "
+        
         return
     fi
     cd $database_name
-    echo "                                     "
-    echo "Connected to database[ $database_name ]."
-    echo "                                     "
+   
+    echo "
+           Connected to Database[ $database_name ].
+         "
+   
 
 
 
@@ -169,15 +248,19 @@ do
 		break ;;
 	    q)
 		cd ..
-                echo "                      "
-                echo "Returned to Main Menu."
-                echo "                      "
+                
+                echo "
+		       Returned to Main Menu.
+		     "
+               
                 break 2 ;;
             *)
 
-		    echo "                                       "
-                    echo "            Invalid option             "
-                    echo "                                       "
+		    
+                    echo " 
+	 	              Invalid option           
+		         "
+                    
 		 ;;   
         esac
     done
@@ -216,9 +299,9 @@ do
             q)
                 exit ;;
             *)
-		    echo "                                       "
-                    echo "            Invalid option             " 
-	            echo "                                       "
+                    echo " 
+	               	    Invalid option   
+	  	         " 
 		;;
         esac
     done
