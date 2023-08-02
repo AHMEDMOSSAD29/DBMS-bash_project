@@ -3,8 +3,7 @@ shopt -s extglob
 
 PS3="
 Enter your option >>> "  
-
-
+clear
 # Function to create a new database
 create_database() {
     read -p "
@@ -29,6 +28,7 @@ create_database() {
     else
     
     mkdir $database_name
+    clear
    
     echo "
             Database[ $database_name ]created successfully!
@@ -39,8 +39,7 @@ create_database() {
 
 # Function to list all existing databases
 list_databases() {
-
-	
+clear
         echo " 
 	---------------------List of Databases----------------------
 	     "
@@ -79,6 +78,7 @@ drop_database() {
 	        
         else
             rm -rf $db_name
+	    clear
 	    
             echo "
 	              Database[ $db_name ]dropped successfully!
@@ -89,62 +89,60 @@ drop_database() {
     done
 }
  
+
 create_table() {
-    # Prompt user for table name
-    while true; do 
-        read -p "
-	          Enter the table name: " table_name
-        if ! [[ "$table_name" =~ ^[a-zA-Z]+$ ]]; then
-            echo "
-	           Invalid table name. Please choose another one.
-	         "
-        elif [ -f "$table_name" ]; then
-            echo "
-	           Table already exist
-		 "
-	    return 1
-        else
-            touch "$table_name"
-            echo "
-	           Table [$table_name] created successfully.
-		 "
-            break
-        fi
-    done
 
-    # Prompt user for column details
-    while true; do 
-        read -p "
-	           Enter column name (leave empty to finish): " column_name
-        if [ -z "$column_name" ]; then
-            break
-        elif ! [[ "$column_name" =~ ^[a-zA-Z0-9]+$ ]]; then
-            echo "
-	           Invalid column name. Please choose another one.
-		 "
-        else
-            # Prompt user for column data type
-            read -p " 
-	             Enter column data type: " column_type
+read -p "
+           Enter a name for the table: " table_name
+	if [[ -f "$table_name" ]];then
+		echo "
+	 	     table already exists
+		"
+		
+		
+	else
+		read -p "Enter number of columns :" cols;
+		if [[ $cols -eq 0 ]];then
+			echo "
+			      Cannot create a table without columns 
+			      "
+			
+		fi
+		 touch $table_name
+		 touch $table_name.metadata
+		 echo "Table Name:"$table_name >>$table_name.metadata
+		 echo "Number of columns:"$cols >>$table_name.metadata
+		
 
-            # Prompt user for primary key status
-            read -p "
-	             Is this column a primary key? (y/n): " is_primary_key
-            if [[ "$is_primary_key" =~ ^y$|^Y$ ]]; then
-                column_type="$column_type:PRIMARY KEY"
-            fi
+		for (( i = 1; i <= cols; i++ )); do
+			if [[ i -eq 1 ]];then
+				read -p "Enter column $i name as a primary key: " name;
+				echo "The primary key for this table is: "$name >>$table_name.metadata
+				echo "Names of columns: " >>$table_name.metadata
+				echo -n $name"," >>$table_name.metadata
 
-            # Add column to table
-            echo "
-	           Adding column [$column_name] with type [$column_type].
-		 "
-            echo "$column_name:$column_type" >> "$table_name"
-        fi
-    done
+			elif [[ i -eq cols ]];then
+				read -p "Enter column $i name: " name;
+				echo -n $name >>$table_name.metadata
+			else
+				read -p "Enter column $i name: " name;
+				echo -n $name"," >>$table_name.metadata
+			fi 
+		done 
+		clear
+
+		echo " 
+	            	Table created sucsessfully  "
+			
+		
+	fi
 }
+
+
 
 #function to list tables
 list_table() {
+	clear
  echo "
         -----------------list of tables----------------
         "
@@ -165,6 +163,7 @@ list_table() {
             echo "
 	          No table created
 	    "
+	    clear
         fi
     fi
 }
@@ -177,16 +176,92 @@ drop_table() {
         if [ -f "$table_name" ]
         then
             rm -r "$table_name"
+	    rm -r "$table_name.metadata"
+	    clear
             echo "
-	               $table_name dropped.
+	              table [$table_name] dropped successfully.
 	               "
+		     
         else
+		clear
             echo "
-	               $table_name does not exist, cannot be dropped.
+	               table [$table_name] does not exist, cannot be dropped.
 	               "
+		       
         fi
     done
 }
+
+insert_into_table() {
+
+read -p "Enter the table name: " table_name
+	if [[ -f "$table_name" ]]; then
+	typeset -i cols=`awk -F, '{if(NR==5){print NF}}' $table_name.metadata`
+	
+	for (( i = 1; i <= $cols; i++ ));
+       	do
+	 	colname=`awk -F, -v"i=$i" '{if(NR==5){print $i}}' $table_name.metadata`
+		read -p "
+		           Enter $colname: " value
+
+		if [[ $colname -eq id ]];then
+				 pks=`sed -n '1,$'p $table_name| cut -f1 -d,`
+				for j in $pks 
+				do					
+					 if [[ $j -eq $value ]]; then 
+
+					        read -p "Cannot use redundant primary key value. Do you want to  show primary keys? (y/n) " answer 
+					   if [[ "$answer" =~ ^Y$|^y$ ]]; then
+
+					        awk -F, '{print $1}' $table_name
+						return
+					   else
+						   return	
+					   fi 
+
+					 fi
+				done
+		fi 
+			if [[ $i != $cols ]]; then
+				echo -n $value"," >>$table_name
+			else	
+				echo $value >>$table_name
+			fi
+	done 
+	echo "
+	       Data has been sorted successfully
+	       "
+ 	
+	else
+		read -p "
+		table [$table_name] doesn't exist! list tables (y/n) :" ans
+		       if [[ "$ans" =~ ^Y$|^y$ ]]
+                           then
+                             list_table
+                       fi
+
+		       
+		
+	fi	
+}
+
+# function to select data from a table
+select_from_table() {
+  # read the number of fields from the user
+  read -p "Enter name of table want to select from :" table_name
+  read -p "Enter the number of fields you want to select: " num_fields
+
+  # read the field numbers from the user
+  read -p "Enter the field numbers you want to select (separated by commas): " fields
+
+  # format the field numbers into a cut command string
+  cut_string=$(echo "$fields" | tr ',' ' ' | awk '{for(i=1;i<=NF;i++) printf "$%s ",$i}')
+
+  # display the selected data
+  printf "%-10s\n" $(echo "$fields" | tr ',' '\t')
+  cut -d $'\t' -f$cut_string < "$table_name" | column -t
+}
+
 
 # Function to connect to a database
 connect_to_database() {
@@ -202,6 +277,7 @@ connect_to_database() {
         return
     fi
     cd $database_name
+    clear
    
     echo "
            Connected to Database[ $database_name ].
@@ -234,7 +310,7 @@ do
                 drop_table
                 break ;;
             i)
-                insert_table
+                insert_into_table
                 break ;;
             D)
                 delete_table
@@ -244,10 +320,11 @@ do
 		break ;;
 
 	    s) 
-		select_table
+		select_from_table
 		break ;;
 	    q)
 		cd ..
+		clear
                 
                 echo "
 		       Returned to Main Menu.
@@ -265,13 +342,16 @@ do
         esac
     done
 done
-
  
 }
 
 
 
-# Main menu loop
+# Main menu 
+
+echo "
+          _________________________ Welcome to ITI Database ____________________________
+"
 while true
 do
 
@@ -297,6 +377,7 @@ do
                 drop_database
                 break ;;
             q)
+		clear
                 exit ;;
             *)
                     echo " 
