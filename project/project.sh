@@ -21,7 +21,7 @@ create_database() {
     elif [[ -d $database_name ]]; then
 
         echo "
-	       Database[ $database_name ]already exists. Please choose a different name.
+	           Database[ $database_name ]already exists. Please choose a different name.
 	     "
 	
         return
@@ -31,7 +31,7 @@ create_database() {
     clear
    
     echo "
-            Database[ $database_name ]created successfully!
+                                Database[ $database_name ]created successfully!
 	 "
     
     fi
@@ -41,7 +41,7 @@ create_database() {
 list_databases() {
 clear
         echo " 
-	---------------------List of Databases----------------------
+	                *---------------------List of Databases----------------------*
 	     "
      for db in */
     do
@@ -50,13 +50,13 @@ clear
         then
                 
                 echo "
-		        Database Name=[ ${db%/} ]
+		                           Database Name=[${db%/}]
 		     "
 	      
 	else
-         	
+         	clear
                 echo "
-	         	No Databases avilable    
+	         	                    No Databases avilable    
 	             "
                
         fi
@@ -71,17 +71,23 @@ drop_database() {
     do
         if [[ ! -d $db_name ]]
         then
-		
+	clear
                 echo "
-	        	Database[ $db_name ]does not exist.
+	        	              Database[ $db_name ]does not exist!
 		     "
+                         read -p "Would you like to list all Databases? (y/n) " ans
+                         if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                          list_databases
+                         fi
+
 	        
         else
             rm -rf $db_name
 	    clear
 	    
             echo "
-	              Database[ $db_name ]dropped successfully!
+	                           Database[ $db_name ]dropped successfully!
 	         "
 	   
 
@@ -89,62 +95,57 @@ drop_database() {
     done
 }
  
+#function to create table 
+create_table(){
+	read -p "Enter the table name (str): " table_name
+     if [[ ! "$table_name" =~ ^[a-zA-Z0-9_]+$ ]]
+    then
+	    clear
+        echo "
+	          Error: The table name can only contain letters mixed with num, underscores."
+        return 1
+    fi
 
-create_table() {
+    if [ -f "$table_name" ]
+    then
+        read -p "Table [$table_name] exists. Would you like to list all tables? (y/n): " ans1
+        if [[ "$ans1" =~ ^[Yy]$ ]]
+        then
+            list_table
+        fi
+    else
+        touch "$table_name"
+        touch "$table_name.metadata"
+        read -p "Enter number of columns (int): " column_count
+	if [[ "$column_count" =~ ^[0-9]*$ ]]; then
+		echo "number of columns: $column_count" >> "$table_name.metadata"
+            else
+                    clear
+                echo "
+		           Error: The number of columns must be numbers "
+                return 1
+            fi
 
-read -p "
-           Enter a name for the table: " table_name
-	if [[ -f "$table_name" ]];then
-		echo "
-	 	     table already exists
-		"
-		
-		
-	else
-		read -p "Enter number of columns :" cols;
-		if [[ $cols -eq 0 ]];then
-			echo "
-			      Cannot create a table without columns 
-			      "
-			
-		fi
-		 touch $table_name
-		 touch $table_name.metadata
-		 echo "Table Name:"$table_name >>$table_name.metadata
-		 echo "Number of columns:"$cols >>$table_name.metadata
-		
 
-		for (( i = 1; i <= cols; i++ )); do
-			if [[ i -eq 1 ]];then
-				read -p "Enter column $i name as a primary key: " name;
-				echo "The primary key for this table is: "$name >>$table_name.metadata
-				echo "Names of columns: " >>$table_name.metadata
-				echo -n $name"," >>$table_name.metadata
+        for ((i=1; i<=$column_count; i++))
+        do
+		read -p "Enter the name of column $i (str): " column_name
+            echo "name of column $i: $column_name" >> "$table_name.metadata"
+	    read -p "Enter the datatype of column $i :" column_type
+	    echo "type of column $i: $column_type" >> "$table_name.metadata"
+        done
+	awk -F': ' 'NR>1 && NR % 2 == 0 {print $2}' $table_name.metadata >>tmp
+	awk '{printf " %s |",$0}' tmp > $table_name
+	rm -rf tmp
 
-			elif [[ i -eq cols ]];then
-				read -p "Enter column $i name: " name;
-				echo -n $name >>$table_name.metadata
-			else
-				read -p "Enter column $i name: " name;
-				echo -n $name"," >>$table_name.metadata
-			fi 
-		done 
-		clear
-
-		echo " 
-	            	Table created sucsessfully  "
-			
-		
-	fi
+        echo "Table [$table_name] created successfully"
+    fi
 }
 
-
-
-#function to list tables
 list_table() {
 	clear
  echo "
-        -----------------list of tables----------------
+                               * -----------------List of Tables---------------- *
         "
 	dir=$(pwd)
 
@@ -153,7 +154,7 @@ list_table() {
 	    echo "`ls $dir`"
     else
         echo "
-	        No tables exist 
+	                                         No tables exist 
 	     "
         read -p "Would you like to create new table? (y/n) " ans
         if [[ "$ans" =~ ^Y$|^y$ ]]
@@ -161,7 +162,7 @@ list_table() {
             create_table
         else
             echo "
-	          No table created
+	                                         No table created
 	    "
 	    clear
         fi
@@ -175,93 +176,59 @@ drop_table() {
     do
         if [ -f "$table_name" ]
         then
-            rm -r "$table_name"
-	    rm -r "$table_name.metadata"
+            rm -rf "$table_name"
+	    rm -rf "$table_name.metadata"
 	    clear
             echo "
-	              table [$table_name] dropped successfully.
+	                             table [$table_name] dropped successfully.
 	               "
 		     
         else
 		clear
-            echo "
-	               table [$table_name] does not exist, cannot be dropped.
-	               "
-		       
+		      read -p "
+               Table[$table_name]doesnt exist,Would you like to list all Tables? (y/n) " ans
+                         if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                          list_table
+                         fi
+ 
         fi
     done
 }
 
-insert_into_table() {
+#function to insert into table
 
-read -p "Enter the table name: " table_name
-	if [[ -f "$table_name" ]]; then
-	typeset -i cols=`awk -F, '{if(NR==5){print NF}}' $table_name.metadata`
-	
-	for (( i = 1; i <= $cols; i++ ));
-       	do
-	 	colname=`awk -F, -v"i=$i" '{if(NR==5){print $i}}' $table_name.metadata`
-		read -p "
-		           Enter $colname: " value
 
-		if [[ $colname -eq id ]];then
-				 pks=`sed -n '1,$'p $table_name| cut -f1 -d,`
-				for j in $pks 
-				do					
-					 if [[ $j -eq $value ]]; then 
-
-					        read -p "Cannot use redundant primary key value. Do you want to  show primary keys? (y/n) " answer 
-					   if [[ "$answer" =~ ^Y$|^y$ ]]; then
-
-					        awk -F, '{print $1}' $table_name
-						return
-					   else
-						   return	
-					   fi 
-
-					 fi
-				done
-		fi 
-			if [[ $i != $cols ]]; then
-				echo -n $value"," >>$table_name
-			else	
-				echo $value >>$table_name
-			fi
-	done 
-	echo "
-	       Data has been sorted successfully
-	       "
- 	
-	else
-		read -p "
-		table [$table_name] doesn't exist! list tables (y/n) :" ans
-		       if [[ "$ans" =~ ^Y$|^y$ ]]
-                           then
-                             list_table
-                       fi
-
-		       
-		
-	fi	
-}
+ 
 
 # function to select data from a table
-select_from_table() {
-  # read the number of fields from the user
-  read -p "Enter name of table want to select from :" table_name
-  read -p "Enter the number of fields you want to select: " num_fields
 
-  # read the field numbers from the user
-  read -p "Enter the field numbers you want to select (separated by commas): " fields
+#function to show table metadata
+show_data(){
 
-  # format the field numbers into a cut command string
-  cut_string=$(echo "$fields" | tr ',' ' ' | awk '{for(i=1;i<=NF;i++) printf "$%s ",$i}')
+	read -p "Enter table name : " table_name
+	if [ -f "$table_name" ]
+        then
+		clear
+		echo " 
+		     *-----------------Metadata of Table[$table_name]----------------*
+				      "
+		sed -n '1,$p' $table_name.metadata | sed G | awk '{printf("%60s\n",$0)}'
 
-  # display the selected data
-  printf "%-10s\n" $(echo "$fields" | tr ',' '\t')
-  cut -d $'\t' -f$cut_string < "$table_name" | column -t
+        else
+                clear
+                      read -p "
+               Table[$table_name]doesnt exist,Would you like to list all Tables? (y/n) " ans
+                         if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                          list_table
+                         fi
+
+        fi
+
+
+
 }
-
 
 # Function to connect to a database
 connect_to_database() {
@@ -269,18 +236,21 @@ connect_to_database() {
                  Enter the name of the database to connect : " database_name
     if [[ ! -d $database_name ]]
     then
-       
-        echo "
-	       Database[ $database_name ]does not exist. Please choose a different name.
-	     "
-        
-        return
+	    clear
+       read -p "
+              Database [$database_name] doesnt exist,Would you like to list all Databases? (y/n) " ans
+                         if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                          list_databases
+                         fi
+
+                          return   
     fi
     cd $database_name
     clear
    
     echo "
-           Connected to Database[ $database_name ].
+                            Connected to Database[$database_name].
          "
    
 
@@ -289,14 +259,16 @@ connect_to_database() {
 while true
 do
 
-        echo "========================================================================="
-        echo "                              Database Menu                                  "
-        echo "========================================================================="
+        echo "======================================================================================="
+        echo "           	                  Database Menu  		                     "
+        echo "======================================================================================="
+	    
 
     select n in  "press c to Create a table" "press l to List tables"\
                  "press d to drop table" "press i to insert into table"\
                  "press s to select from table" "press D to Delete from table"\
-		 "press u to update table" "press q to return to main menu"
+		 "press u to update table" "press w to show table metadata"\
+		 "press q to return to main menu"
     do
         case $REPLY in
             c)
@@ -318,6 +290,9 @@ do
 	    u)
 		update_table
 		break ;;
+	    w)
+		show_data
+		break ;;
 
 	    s) 
 		select_from_table
@@ -327,7 +302,7 @@ do
 		clear
                 
                 echo "
-		       Returned to Main Menu.
+		                                 Returned to Main Menu.
 		     "
                
                 break 2 ;;
@@ -335,7 +310,7 @@ do
 
 		    
                     echo " 
-	 	              Invalid option           
+	 	                                    Invalid option           
 		         "
                     
 		 ;;   
@@ -349,15 +324,26 @@ done
 
 # Main menu 
 
-echo "
-          _________________________ Welcome to ITI Database ____________________________
-"
+ahmed=$(cat << "EOF"
+                   _                              _     __  __                                     _ 
+           /\     | |                            | |   |  \/  |                                   | |
+          /  \    | |__    _ __ ___     ___    __| |   | \  / |   ___    ___    __ _    __ _    __| |
+         / /\ \   | '_ \  | '_ ` _ \   / _ \  / _` |   | |\/| |  / _ \  / __|  / _` |  / _` |  / _` |
+        / ____ \  | | | | | | | | | | |  __/ | (_| |   | |  | | | (_) | \__ \ | (_| | | (_| | | (_| |
+       /_/    \_\ |_| |_| |_| |_| |_|  \___|  \__,_|   |_|  |_|  \___/  |___/  \__,_|  \__,_|  \__,_|
+                                                                                               
+                                                                                               
+                                            Welcome to my database 
+EOF
+)
+echo "$ahmed "
+
 while true
 do
 
-	echo "========================================================================="
-        echo "                              Main Menu                                  "
-        echo "========================================================================="
+	echo "================================================================================================"
+	echo "                                         Main Menu                                              "
+        echo "================================================================================================"
 
     select n in  "press C to Create a database" "press l to List all databases"\
 		  "press c to connect to a database"\
@@ -381,7 +367,7 @@ do
                 exit ;;
             *)
                     echo " 
-	               	    Invalid option   
+	               	                             Invalid option   
 	  	         " 
 		;;
         esac
