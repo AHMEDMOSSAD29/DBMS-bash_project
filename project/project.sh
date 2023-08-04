@@ -98,11 +98,11 @@ drop_database() {
 #function to create table 
 create_table(){
 	read -p "Enter the table name (str): " table_name
-     if [[ ! "$table_name" =~ ^[a-zA-Z0-9_]+$ ]]
+     if [[ ! "$table_name" =~ ^[a-zA-Z_]+$ ]]
     then
 	    clear
         echo "
-	          Error: The table name can only contain letters mixed with num, underscores."
+	          Error: The table name can only contain letters, underscores."
         return 1
     fi
 
@@ -125,16 +125,40 @@ create_table(){
 		           Error: The number of columns must be numbers "
                 return 1
             fi
+	    primary_key_set=false
+            primary_key=""
 
+for ((i=1; i<=$column_count; i++))
+do
+    read -p "Enter the name of column $i (str): " column_name
+    echo "name of column $i: $column_name" >> "$table_name.metadata"
+    read -p "Enter the datatype of column $i :" column_type
+    echo "type of column $i: $column_type" >> "$table_name.metadata"
 
-        for ((i=1; i<=$column_count; i++))
-        do
-		read -p "Enter the name of column $i (str): " column_name
-            echo "name of column $i: $column_name" >> "$table_name.metadata"
-	    read -p "Enter the datatype of column $i :" column_type
-	    echo "type of column $i: $column_type" >> "$table_name.metadata"
+    if ! $primary_key_set; then
+        while true; do
+            read -p "Is $column_name the primary key? [yes/no]: " is_primary
+            case $is_primary in
+                [yY]es )
+                    primary_key=$column_name
+                    primary_key_set=true
+                    break ;;
+                [nN]o )
+                    break ;;
+                * )
+                    echo "Please answer yes or no." ;;
+            esac
         done
-	awk -F': ' 'NR>1 && NR % 2 == 0 {print $2}' $table_name.metadata >>tmp
+    fi
+done
+
+# Write primary key information to metadata file
+echo "primary key: $primary_key" > "$table_name.metadata.tmp"
+cat "$table_name.metadata" >> "$table_name.metadata.tmp"
+mv "$table_name.metadata.tmp" "$table_name.metadata"
+
+
+	awk -F': ' 'NR>2 && NR % 2 == 1 {print $2}' $table_name.metadata >>tmp
 	awk '{printf " %s |",$0}' tmp > $table_name
 	rm -rf tmp
 
@@ -197,10 +221,20 @@ drop_table() {
 }
 
 #function to insert into table
+insert_into_table(){
+    read -p "Enter the table name you want to insert into (str): " table_name
 
+    if [ ! -f "$table_name" ]; then
+        clear
+        read -p "Table [$table_name] doesn't exist. Would you like to list all tables? (y/n) " ans
+        if [[ "$ans" =~ ^[Yy]$ ]]; then
+            list_table
+        fi
+        return 1
+    fi
 
  
-
+}
 # function to select data from a table
 
 #function to show table metadata
@@ -267,7 +301,7 @@ do
     select n in  "press c to Create a table" "press l to List tables"\
                  "press d to drop table" "press i to insert into table"\
                  "press s to select from table" "press D to Delete from table"\
-		 "press u to update table" "press w to show table metadata"\
+		 "press u to update table" "press w to show tables metadata"\
 		 "press q to return to main menu"
     do
         case $REPLY in
