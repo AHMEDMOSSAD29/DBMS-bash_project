@@ -137,13 +137,13 @@ do
 
     if ! $primary_key_set; then
         while true; do
-            read -p "Is $column_name the primary key? [yes/no]: " is_primary
+            read -p "Is $column_name the primary key? [y/n]: " is_primary
             case $is_primary in
-                [yY]es )
+                [yY] )
                     primary_key=$column_name
                     primary_key_set=true
                     break ;;
-                [nN]o )
+                [nN] )
                     break ;;
                 * )
                     echo "Please answer yes or no." ;;
@@ -159,7 +159,8 @@ mv "$table_name.metadata.tmp" "$table_name.metadata"
 
 
 	awk -F': ' 'NR>2 && NR % 2 == 1 {print $2}' $table_name.metadata >>tmp
-	awk '{printf " %s |",$0}' tmp > $table_name
+        awk '{printf " %s |",$0} END{printf "\n"}' tmp > $table_name
+
 	rm -rf tmp
 
         echo "Table [$table_name] created successfully"
@@ -221,20 +222,34 @@ drop_table() {
 }
 
 #function to insert into table
-insert_into_table(){
-    read -p "Enter the table name you want to insert into (str): " table_name
 
-    if [ ! -f "$table_name" ]; then
-        clear
-        read -p "Table [$table_name] doesn't exist. Would you like to list all tables? (y/n) " ans
-        if [[ "$ans" =~ ^[Yy]$ ]]; then
-            list_table
-        fi
-        return 1
-    fi
+insert_into_table() {
 
- 
+declare -a column_data_array
+
+  read -p "Enter table name :" table_name
+  if ! [[ -f $table_name ]]; then
+	  read -p "Table $tableName isn't existed ,list all tables ? (y/n)" ans
+	   if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                          list_table
+                         fi
+  fi
+  column_count=`awk 'NR==2{split($0,a,":"); print a[2]}' $table_name.metadata`
+  column_type=(`awk -F': ' 'NR>3 && NR % 2 == 0 {print $2}' $table_name.metadata`)
+  column_name=(`awk -F': ' 'NR>2 && NR % 2 == 1 {print $2}' $table_name.metadata`)
+
+for ((i=0; i<$column_count; i++))
+do
+	read -p "Enter the data for column (${column_name[$i]}) with type(${column_type[$i]}): " column_data
+column_data_array+=("$column_data")
+
+done
+printf '%s |' "${column_data_array[@]}" >> "$table_name"; printf '\n' >> "$table_name"
+
 }
+
+
 # function to select data from a table
 
 #function to show table metadata
