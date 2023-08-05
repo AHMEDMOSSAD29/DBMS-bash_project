@@ -477,9 +477,11 @@ do
             s)
 		    read -p "
                           Enter table name : " table_name
-			  read -p "Enter column number to delete: " num
-                          cut -d "|" -f-${num} --complement $table_name | awk '{$1=$1}1' OFS="|" > temp_table
-                          mv temp_table $table_name
+			  read -p "
+			  Enter column number to delete : " colnum
+		          awk -F\| -v OFS=\| -v colnum=$colnum '{ $colnum="" }1' $table_name > $table_name.tmp
+
+                          mv $table_name.tmp $table_name
 
 
 
@@ -487,9 +489,10 @@ do
             n)
 		    read -p "
                           Enter table name : " table_name
-			  read -p "Enter the comma-separated column numbers to delete: " col_nums
-cut -d "|" -f-$(echo $col_nums | sed 's/,/ /g') --complement $table_name | awk '{$1=$1}1' OFS="|" > temp_table
-mv temp_table $table_name
+			  read -p "Enter space-separated column numbers to delete: " cols
+                          awk -v cols="$cols" -F\| -v OFS=\| '{split(cols, nums, " "); for (i in nums) $nums[i]=""; print}' $table_name > $table_name.tmp
+			  mv $table_name.tmp $table_name
+
 
 
 
