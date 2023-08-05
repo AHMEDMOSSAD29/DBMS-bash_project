@@ -260,6 +260,9 @@ column_data_array+=("$column_data")
 
 done
 printf ' %s | ' "${column_data_array[@]}" >> "$table_name"; printf '\n' >> "$table_name"
+clear
+echo " 
+                                       Data inserted successfully "
 
 }
 
@@ -375,6 +378,138 @@ done
 
 }
 
+#function for row deletion
+row_deletion(){
+while true
+do
+
+	echo "======================================================================================="
+        echo "                                  Row Deletion options                                "
+        echo "======================================================================================="
+
+
+
+    select n in  "press a to delete all rows  " "press s to delete spasfic row"\
+                  "press n to delete number of rows" "press q to Quit"
+    do
+
+        case $REPLY in
+            a)
+		    read -p "
+                          Enter table name : " table_name
+
+		sed '2,$d' $table_name > $table_name.tmp
+		mv $table_name.tmp $table_name
+		clear 
+		echo "
+		                             all row deleted successfully"
+
+                break ;;
+            s)
+		    read -p "
+                          Enter table name : " table_name
+			  read -p "Enter the row number to delete: " row_num
+                          sed "${row_num}d" $table_name > $table_name.tmp 
+			  mv $table_name.tmp $table_name
+			  clear
+			  echo "
+			                   row[$row_num]deleted successfully"
+
+
+
+                break ;;
+            n)
+		    read -p "
+                          Enter table name : " table_name
+			  read -p "Enter the comma-separated row numbers to delete: " row_nums
+                          sed -i "2,$(echo $row_nums | sed 's/,/d;/g')d" $table_name
+			  clear
+                          echo "
+                                           rows[$row_nums]deleted successfully"
+
+
+
+
+
+                break ;;
+            q)
+                clear
+                return ;;
+            *)
+                    echo "
+                                                     Invalid option
+                         "
+                ;;
+        esac
+    done
+done
+
+
+}
+
+#function for columns deletion
+column_deletion(){
+while true
+do
+
+	echo "======================================================================================="
+        echo "                                  Column Deletion options                             "
+        echo "======================================================================================="
+
+
+
+    select n in  "press a to delete all columns  " "press s to delete spasfic column"\
+                 "press n to delete number of columns" "press q to Quit"
+    do
+
+        case $REPLY in
+            a)
+		    read -p "
+                          Enter table name : " table_name
+
+		sed '2,$d' $table_name > $table_name.tmp
+                mv $table_name.tmp $table_name
+                clear
+                echo "
+                                             all cloumns deleted successfully"
+
+                break ;;
+            s)
+		    read -p "
+                          Enter table name : " table_name
+			  read -p "Enter column number to delete: " num
+                          cut -d "|" -f-${num} --complement $table_name | awk '{$1=$1}1' OFS="|" > temp_table
+                          mv temp_table $table_name
+
+
+
+                break ;;
+            n)
+		    read -p "
+                          Enter table name : " table_name
+			  read -p "Enter the comma-separated column numbers to delete: " col_nums
+cut -d "|" -f-$(echo $col_nums | sed 's/,/ /g') --complement $table_name | awk '{$1=$1}1' OFS="|" > temp_table
+mv temp_table $table_name
+
+
+
+
+                break ;;
+            q)
+                clear
+                return ;;
+            *)
+                    echo "
+                                                     Invalid option
+                         "
+                ;;
+        esac
+    done
+done
+
+
+}
+
 
 # function to select data from a table
 
@@ -411,6 +546,38 @@ done
     
 }
 
+delete_from_table() {
+
+while true
+do
+	echo "======================================================================================="
+        echo "                                    Deletion options                                  "
+        echo "======================================================================================="
+
+
+
+    select n in  "press r for row Deletion " "press c for column Deletion" "press q to Quit"
+    do
+        case $REPLY in
+            r)
+                row_deletion
+                break ;;
+            c)
+                column_deletion
+                break ;;
+            q)
+                clear
+                return ;;
+            *)
+                    echo "
+                                                     Invalid option
+                         "
+                ;;
+        esac
+    done
+done
+
+}
 
 
 #function to show table metadata
@@ -495,7 +662,7 @@ do
                 insert_into_table
                 break ;;
             D)
-                delete_table
+                delete_from_table
                 break ;;
 	    u)
 		update_table
