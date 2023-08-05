@@ -162,8 +162,11 @@ mv "$table_name.metadata.tmp" "$table_name.metadata"
         awk '{printf " %s |",$0} END{printf "\n"}' tmp > $table_name
 
 	rm -rf tmp
+	clear
 
-        echo "Table [$table_name] created successfully"
+        echo "
+	                          Table [$table_name] created successfully
+	    "
     fi
 }
 
@@ -172,6 +175,11 @@ list_table() {
  echo "
                                * -----------------List of Tables---------------- *
         "
+	echo "
+	       Hints :
+	       i) (table_name) has a name without any exctentions.
+	      ii) table metadata have name of (table_name.meatedata)
+	      "
 	dir=$(pwd)
 
     if [ "$(ls -A $dir)" ]
@@ -211,7 +219,7 @@ drop_table() {
         else
 		clear
 		      read -p "
-               Table[$table_name]doesnt exist,Would you like to list all Tables? (y/n) " ans
+               Table[$table_name]doesnt exist,Would you like to list all Tables? (y/n): " ans
                          if [[ "$ans" =~ ^Y$|^y$ ]]
                          then
                           list_table
@@ -227,17 +235,23 @@ insert_into_table() {
 
 declare -a column_data_array
 
-  read -p "Enter table name :" table_name
-  if ! [[ -f $table_name ]]; then
-	  read -p "Table $tableName isn't existed ,list all tables ? (y/n)" ans
+  read -p "Enter table name : " table_name
+  if  [[ ! -f $table_name ]]; then
+	  read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
 	   if [[ "$ans" =~ ^Y$|^y$ ]]
                          then
+				 clear
                           list_table
+			  return
+		  else
+			  return
+			  clear
                          fi
   fi
   column_count=`awk 'NR==2{split($0,a,":"); print a[2]}' $table_name.metadata`
   column_type=(`awk -F': ' 'NR>3 && NR % 2 == 0 {print $2}' $table_name.metadata`)
   column_name=(`awk -F': ' 'NR>2 && NR % 2 == 1 {print $2}' $table_name.metadata`)
+  
 
 for ((i=0; i<$column_count; i++))
 do
@@ -245,12 +259,159 @@ do
 column_data_array+=("$column_data")
 
 done
-printf '%s |' "${column_data_array[@]}" >> "$table_name"; printf '\n' >> "$table_name"
+printf ' %s | ' "${column_data_array[@]}" >> "$table_name"; printf '\n' >> "$table_name"
+
+}
+
+#function for row selection
+row_selection(){
+while true
+do
+
+	echo "======================================================================================="
+        echo "                                  Row Selection options                                "
+        echo "======================================================================================="
+
+
+
+    select n in  "press a to select all rows  " "press s to select spasfic row"\
+                  "press n to select number of rows" "press q to Quit"
+    do
+
+        case $REPLY in
+            a)
+		    read -p "
+                          Enter table name : " table_name
+
+		cat $table_name
+                break ;;
+            s)
+		    read -p "
+                          Enter table name : " table_name
+
+		    read -p "
+		          Enter row number : " row_num
+		awk 'NR==1{print}' $table_name
+                awk -v num="$row_num" 'NR==num{print; exit}' $table_name
+
+                break ;;
+            n)
+		    read -p "
+                          Enter table name : " table_name
+
+		    read -p "
+		          Enter number of rows : " row_num
+			   awk -v num="$row_num" '{print} NR==num{exit}' $table_name | head -n "$row_num"
+                break ;;
+            q)
+                clear
+                return ;;
+            *)
+                    echo "
+                                                     Invalid option
+                         "
+                ;;
+        esac
+    done
+done
+
+
+}
+
+#function of column selection 
+
+column_selection(){
+while true
+do
+
+	echo "======================================================================================="
+        echo "                                  Column Selection options                             "
+        echo "======================================================================================="
+
+
+
+    select n in  "press a to select all columns  " "press s to select spasfic column"\
+                 "press n to select number of columns" "press q to Quit"
+    do
+
+        case $REPLY in
+            a)
+		    read -p "
+                          Enter table name : " table_name
+
+		cat $table_name
+                break ;;
+            s)
+		    read -p "
+                          Enter table name : " table_name
+
+		    read -p "
+		          Enter column number : " num
+			  cut -d "|" -f $num $table_name | sed 's/^/| /; s/$/ |/'
+
+                break ;;
+            n)
+		    read -p "
+                          Enter table name : " table_name
+			  read -p "
+			  Enter the comma-separated column numbers to display: " col_nums
+                          cut -d "|" -f $col_nums $table_name | sed 's/^/| /; s/$/ |/'
+
+
+
+                break ;;
+            q)
+                clear
+                return ;;
+            *)
+                    echo "
+                                                     Invalid option
+                         "
+                ;;
+        esac
+    done
+done
+
 
 }
 
 
 # function to select data from a table
+
+select_from_table() {
+
+while true
+do
+	echo "======================================================================================="
+        echo "                                    Selection options                                  "
+        echo "======================================================================================="
+
+
+
+    select n in  "press r for row selection " "press c for column selection" "press q to Quit"
+    do
+        case $REPLY in
+            r)
+                row_selection
+                break ;;
+            c)
+                column_selection
+                break ;;
+            q)
+                clear
+                return ;;
+            *)
+                    echo "
+                                                     Invalid option
+                         "
+                ;;
+        esac
+    done
+done
+    
+}
+
+
 
 #function to show table metadata
 show_data(){
