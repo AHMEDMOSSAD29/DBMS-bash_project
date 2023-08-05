@@ -482,6 +482,10 @@ do
 		          awk -F\| -v OFS=\| -v colnum=$colnum '{ $colnum="" }1' $table_name > $table_name.tmp
 
                           mv $table_name.tmp $table_name
+			  clear
+			  echo "
+			  column[$colnum]deleted successfully 
+			  "
 
 
 
@@ -492,6 +496,10 @@ do
 			  read -p "Enter space-separated column numbers to delete: " cols
                           awk -v cols="$cols" -F\| -v OFS=\| '{split(cols, nums, " "); for (i in nums) $nums[i]=""; print}' $table_name > $table_name.tmp
 			  mv $table_name.tmp $table_name
+			  clear
+			  echo "
+			  columns[$cols]deleted successfully
+			  "
 
 
 
@@ -513,6 +521,9 @@ done
 
 }
 
+
+ 
+ 
 
 # function to select data from a table
 
@@ -568,6 +579,58 @@ do
             c)
                 column_deletion
                 break ;;
+            q)
+                clear
+                return ;;
+            *)
+                    echo "
+                                                     Invalid option
+                         "
+                ;;
+        esac
+    done
+done
+
+}
+
+
+#function to update table 
+
+update_table() {
+
+while true
+do
+	echo "======================================================================================="
+        echo "                                    Update options                                     "
+        echo "======================================================================================="
+
+
+
+    select n in  "press u for update " "press q to Quit"
+    do
+        case $REPLY in
+            u)
+            read -p "
+                          Enter table name : " table_name
+
+			 echo " "
+			    cat $table_name
+			 echo "" 
+
+
+                          read -p "Enter the field to replace and its replacement, separated by a space: " search_word replace_word
+awk -v search="$search_word" -v replace="$replace_word" -F '|' -v OFS='|' '{gsub(search, replace, $0); print}' "$table_name" > $table_name.tmp
+                          mv $table_name.tmp $table_name
+			  
+			  cat $table_name
+			  echo "
+			  [$search_word] replaced by [$replace_word] successfully "
+
+
+        
+                
+                break ;;
+         
             q)
                 clear
                 return ;;
