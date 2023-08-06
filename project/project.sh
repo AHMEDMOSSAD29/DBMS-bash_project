@@ -283,28 +283,78 @@ do
 
         case $REPLY in
             a)
-		    read -p "
+			  read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+			  break
+				  fi
+			  fi
 
 		cat $table_name
-                break ;;
+                
+				 
+			  break
+	       	;;
             s)
 		    read -p "
                           Enter table name : " table_name
+			  if  [[ ! -f $table_name ]]; then
+          read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+           if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          break
+			  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+			  break
+	   fi
+			  fi
+
 
 		    read -p "
 		          Enter row number : " row_num
 		awk 'NR==1{print}' $table_name
                 awk -v num="$row_num" 'NR==num{print; exit}' $table_name
 
-                break ;;
+                
+			  break
+	       	;;
             n)
 		    read -p "
                           Enter table name : " table_name
+			  if  [[ ! -f $table_name ]]; then
+          read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+           if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+			  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+			  break
+	   fi
+			  fi
 
 		    read -p "
 		          Enter number of rows : " row_num
 			   awk -v num="$row_num" '{print} NR==num{exit}' $table_name | head -n "$row_num"
+	   
+			 
                 break ;;
             q)
                 clear
@@ -339,14 +389,44 @@ do
 
         case $REPLY in
             a)
-		    read -p "
+		      read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+                          break
+                                  fi
+                          fi
+
 
 		cat $table_name
                 break ;;
             s)
-		    read -p "
+		      read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+                          break
+                                  fi
+                          fi
+
 
 		    read -p "
 		          Enter column number : " num
@@ -354,8 +434,23 @@ do
 
                 break ;;
             n)
-		    read -p "
+		      read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+                          break
+                                  fi
+                          fi
+
 			  read -p "
 			  Enter the comma-separated column numbers to display: " col_nums
                           cut -d "|" -f $col_nums $table_name | sed 's/^/| /; s/$/ |/'
@@ -395,8 +490,23 @@ do
 
         case $REPLY in
             a)
-		    read -p "
+		      read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+                          break
+                                  fi
+                          fi
+
 
 		sed '2,$d' $table_name > $table_name.tmp
 		mv $table_name.tmp $table_name
@@ -406,8 +516,23 @@ do
 
                 break ;;
             s)
-		    read -p "
+		      read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+                          break
+                                  fi
+                          fi
+
 			  read -p "Enter the row number to delete: " row_num
                           sed "${row_num}d" $table_name > $table_name.tmp 
 			  mv $table_name.tmp $table_name
@@ -419,8 +544,23 @@ do
 
                 break ;;
             n)
-		    read -p "
+		      read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+                          break
+                                  fi
+                          fi
+
 			  read -p "Enter the comma-separated row numbers to delete: " row_nums
                           sed -i "2,$(echo $row_nums | sed 's/,/d;/g')d" $table_name
 			  clear
@@ -464,8 +604,23 @@ do
 
         case $REPLY in
             a)
-		    read -p "
+		      read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+                          break
+                                  fi
+                          fi
+
 
 		sed '2,$d' $table_name > $table_name.tmp
                 mv $table_name.tmp $table_name
@@ -475,8 +630,23 @@ do
 
                 break ;;
             s)
-		    read -p "
+		      read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+                          break
+                                  fi
+                          fi
+
 			  read -p "
 			  Enter column number to delete : " colnum
 		          awk -F\| -v OFS=\| -v colnum=$colnum '{ $colnum="" }1' $table_name > $table_name.tmp
@@ -491,8 +661,23 @@ do
 
                 break ;;
             n)
-		    read -p "
+		      read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+                          break
+                                  fi
+                          fi
+
 			  read -p "Enter space-separated column numbers to delete: " cols
                           awk -v cols="$cols" -F\| -v OFS=\| '{split(cols, nums, " "); for (i in nums) $nums[i]=""; print}' $table_name > $table_name.tmp
 			  mv $table_name.tmp $table_name
@@ -610,8 +795,23 @@ do
     do
         case $REPLY in
             u)
-            read -p "
+		      read -p "
                           Enter table name : " table_name
+                          if  [[ ! -f $table_name ]]; then
+                    read -p "Table [$table_name] doesn't exist ,list all tables ? (y/n): " ans
+                                  if [[ "$ans" =~ ^Y$|^y$ ]]
+                         then
+                                 clear
+                          list_table
+                          return
+                  elif [[ "$ans" =~ ^N$|^n$ ]]
+                  then
+                          return
+                  else
+                          break
+                                  fi
+                          fi
+
 
 			 echo " "
 			    cat $table_name
@@ -768,18 +968,21 @@ done
 # Main menu 
 
 ahmed=$(cat << "EOF"
-                   _                              _     __  __                                     _ 
-           /\     | |                            | |   |  \/  |                                   | |
-          /  \    | |__    _ __ ___     ___    __| |   | \  / |   ___    ___    __ _    __ _    __| |
-         / /\ \   | '_ \  | '_ ` _ \   / _ \  / _` |   | |\/| |  / _ \  / __|  / _` |  / _` |  / _` |
-        / ____ \  | | | | | | | | | | |  __/ | (_| |   | |  | | | (_) | \__ \ | (_| | | (_| | | (_| |
-       /_/    \_\ |_| |_| |_| |_| |_|  \___|  \__,_|   |_|  |_|  \___/  |___/  \__,_|  \__,_|  \__,_|
+          __  __  ____   _____ _____         _____    _____  ____  
+         |  \/  |/ __ \ / ____/ ____|  /\   |  __ \  |  __ \|  _ \ 
+         | \  / | |  | | (___| (___   /  \  | |  | | | |  | | |_) |
+         | |\/| | |  | |\___ \\___ \ / /\ \ | |  | | | |  | |  _ < 
+         | |  | | |__| |____) |___) / ____ \| |__| | | |__| | |_) |
+         |_|  |_|\____/|_____/_____/_/    \_\_____/  |_____/|____/ 
+                                                           
                                                                                                
-                                                                                               
-                                            Welcome to my database 
+                                            Welcome to the database 
 EOF
 )
-echo "$ahmed "
+
+green=$(tput setaf 2)
+reset=$(tput sgr0)
+echo "${green}$ahmed${reset}"
 
 while true
 do
