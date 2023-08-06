@@ -28,7 +28,8 @@ The Application will be CLI Menu based app, that will provide to user this Menu 
 
  ## steps for running the script 
  #### Enter in your terminal :
- > I) export PATH=$PATH:$(pwd)
- > II) project.sh
+ > ##### I) export PATH=$PATH:$(pwd)
+
+ > ##### II) project.sh
 
 
