@@ -31,5 +31,7 @@ The Application will be CLI Menu based app, that will provide to user this Menu 
  > ##### I) export PATH=$PATH:$(pwd)
 
  > ##### II) project.sh
+#### or simply :
+> ##### ./project.sh
 
 
