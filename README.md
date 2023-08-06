@@ -26,4 +26,9 @@ The Application will be CLI Menu based app, that will provide to user this Menu 
 >- Ask about columns datatypes in create table and check on them in both insert and update
 >-Ask about primary key in create table and check for it in the insert into table
 
- 
+ ## steps for running the script 
+ #### Enter in your terminal :
+ > I) export PATH=$PATH:$(pwd)
+ > II) project.sh
+
+
