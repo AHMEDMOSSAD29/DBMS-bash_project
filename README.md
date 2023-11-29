@@ -40,5 +40,5 @@ project.sh
 ```
 
 ## Demo 
-]project demo](demo.webm)
+[project demo](demo.webm)
 
