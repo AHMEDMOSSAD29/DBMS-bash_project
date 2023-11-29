@@ -41,6 +41,4 @@ project.sh
 
 ## Demo 
 ![project demo](demo.webm)
-```
-https://github.com/AHMEDMOSSAD29/DBMS-bash_project/blob/main/demo.webm
-```
+
