@@ -40,4 +40,7 @@ The Application will be CLI Menu based app, that will provide to user this Menu 
 ```
 
 ## Demo 
-         https://github.com/AHMEDMOSSAD29/DBMS-bash_project/blob/main/demo.webm
+[project demo](demo.webm)
+```
+https://github.com/AHMEDMOSSAD29/DBMS-bash_project/blob/main/demo.webm
+```
