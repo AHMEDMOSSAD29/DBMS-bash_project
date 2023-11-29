@@ -28,11 +28,11 @@ The Application will be CLI Menu based app, that will provide to user this Menu 
 
  ## steps for running the script 
  #### Enter in your terminal :
- ```
- export PATH=$PATH:$(pwd)
+```
+export PATH=$PATH:$(pwd)
 ```
 ```
-    project.sh
+project.sh
 ```
 #### or simply :
 ```
@@ -40,7 +40,7 @@ The Application will be CLI Menu based app, that will provide to user this Menu 
 ```
 
 ## Demo 
-[project demo](demo.webm)
+![project demo](demo.webm)
 ```
 https://github.com/AHMEDMOSSAD29/DBMS-bash_project/blob/main/demo.webm
 ```
